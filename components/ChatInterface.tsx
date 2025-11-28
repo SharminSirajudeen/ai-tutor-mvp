@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Sparkles, Eye, Settings, ChevronDown } from 'lucide-react';
+import { Send, Bot, User, Sparkles, Eye, Settings, ChevronDown, MessageSquare } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -252,6 +252,18 @@ export default function ChatInterface({ canvasContext, onDrawCommands }: ChatInt
                         <Send className="w-4 h-4" />
                     </button>
                 </form>
+                {/* Feedback Link */}
+                <div className="mt-3 flex justify-center">
+                    <a
+                        href="https://github.com/SharminSirajudeen/ai-tutor-mvp/issues/new?title=Feedback&labels=feedback"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-indigo-600 transition-colors"
+                    >
+                        <MessageSquare className="w-3.5 h-3.5" />
+                        <span>Give Feedback to Author</span>
+                    </a>
+                </div>
             </div>
         </div>
     );
