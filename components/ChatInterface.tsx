@@ -194,15 +194,13 @@ export default function ChatInterface({ canvasContext, onDrawCommands }: ChatInt
                             </span>
                         </div>
                         {/* Usage Indicator */}
-                        {usage.date && (
-                            <div className={`text-xs px-2 py-1 rounded-full ${
-                                usage.count >= DAILY_MESSAGE_LIMIT * 0.8
-                                    ? 'bg-amber-50 text-amber-700'
-                                    : 'bg-slate-100 text-slate-600'
-                            }`}>
-                                {DAILY_MESSAGE_LIMIT - usage.count} left today
-                            </div>
-                        )}
+                        <div className={`text-xs px-2 py-1 rounded-full ${
+                            usage.count >= DAILY_MESSAGE_LIMIT * 0.8
+                                ? 'bg-amber-50 text-amber-700'
+                                : 'bg-slate-100 text-slate-600'
+                        }`}>
+                            {DAILY_MESSAGE_LIMIT - usage.count} left today
+                        </div>
                         {/* Model Selector */}
                         <div className="relative">
                             <button
