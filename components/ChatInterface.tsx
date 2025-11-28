@@ -53,6 +53,35 @@ function parseDrawCommands(content: string): { actions: DrawAction[], cleanConte
     }
 }
 
+// Rate limiting config
+const DAILY_MESSAGE_LIMIT = 50; // Messages per day per student
+const RATE_LIMIT_KEY = 'ai-tutor-usage';
+
+interface UsageData {
+    count: number;
+    date: string;
+}
+
+function getUsage(): UsageData {
+    if (typeof window === 'undefined') return { count: 0, date: new Date().toDateString() };
+    const stored = localStorage.getItem(RATE_LIMIT_KEY);
+    if (!stored) return { count: 0, date: new Date().toDateString() };
+    const data = JSON.parse(stored) as UsageData;
+    // Reset if it's a new day
+    if (data.date !== new Date().toDateString()) {
+        return { count: 0, date: new Date().toDateString() };
+    }
+    return data;
+}
+
+function incrementUsage(): UsageData {
+    const usage = getUsage();
+    usage.count += 1;
+    usage.date = new Date().toDateString();
+    localStorage.setItem(RATE_LIMIT_KEY, JSON.stringify(usage));
+    return usage;
+}
+
 export default function ChatInterface({ canvasContext, onDrawCommands }: ChatInterfaceProps) {
     const [messages, setMessages] = useState<Message[]>([
         { role: 'assistant', content: "Hello! I'm your Socratic Tutor for this problem. I won't give you the answer, but I'll guide you through the subset construction method. Where would you like to start?" }
@@ -61,14 +90,16 @@ export default function ChatInterface({ canvasContext, onDrawCommands }: ChatInt
     const [isLoading, setIsLoading] = useState(false);
     const [selectedModel, setSelectedModel] = useState('llama-3.3-70b');
     const [showModelSelector, setShowModelSelector] = useState(false);
+    const [usage, setUsage] = useState<UsageData>({ count: 0, date: '' });
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    // Load saved model preference from localStorage
+    // Load saved model preference and usage from localStorage
     useEffect(() => {
         const savedModel = localStorage.getItem('ai-tutor-model');
         if (savedModel && MODELS.find(m => m.key === savedModel)) {
             setSelectedModel(savedModel);
         }
+        setUsage(getUsage());
     }, []);
 
     // Save model preference to localStorage
@@ -90,10 +121,24 @@ export default function ChatInterface({ canvasContext, onDrawCommands }: ChatInt
         e.preventDefault();
         if (!input.trim() || isLoading) return;
 
+        // Check rate limit
+        const currentUsage = getUsage();
+        if (currentUsage.count >= DAILY_MESSAGE_LIMIT) {
+            setMessages(prev => [...prev, {
+                role: 'assistant',
+                content: `You've reached the daily limit of ${DAILY_MESSAGE_LIMIT} messages. Please come back tomorrow! This limit helps keep the service free for everyone.`
+            }]);
+            return;
+        }
+
         const userMessage = input.trim();
         setInput('');
         setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
         setIsLoading(true);
+
+        // Increment usage
+        const newUsage = incrementUsage();
+        setUsage(newUsage);
 
         try {
             console.log('Sending message with context:', canvasContext, 'model:', selectedModel);
@@ -148,6 +193,16 @@ export default function ChatInterface({ canvasContext, onDrawCommands }: ChatInt
                                 }
                             </span>
                         </div>
+                        {/* Usage Indicator */}
+                        {usage.date && (
+                            <div className={`text-xs px-2 py-1 rounded-full ${
+                                usage.count >= DAILY_MESSAGE_LIMIT * 0.8
+                                    ? 'bg-amber-50 text-amber-700'
+                                    : 'bg-slate-100 text-slate-600'
+                            }`}>
+                                {DAILY_MESSAGE_LIMIT - usage.count} left today
+                            </div>
+                        )}
                         {/* Model Selector */}
                         <div className="relative">
                             <button
