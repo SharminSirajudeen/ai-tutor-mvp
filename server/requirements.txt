@@ -1,0 +1,29 @@
+# AI Tutor MVP Backend Dependencies
+# Budget: $0 (using free tiers and open-source tools)
+
+# Core Framework
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+python-dotenv>=1.0.0
+
+# LangChain & LangGraph - use compatible versions
+langchain>=0.3.0
+langchain-core>=0.3.0
+langchain-groq>=0.2.0
+langgraph>=0.2.0
+
+# Pydantic (required by FastAPI and LangChain)
+pydantic>=2.0.0
+
+# Additional dependencies
+httpx>=0.28.0  # HTTP client for LangChain
+anyio>=4.0.0  # Async support
+
+# Optional: Production enhancements (add when needed)
+# gunicorn==21.2.0  # Production WSGI server
+# prometheus-client==0.20.0  # Metrics
+# sentry-sdk[fastapi]==1.40.0  # Error tracking
+
+# Optional: Database checkpointers (upgrade path)
+# langgraph[sqlite]  # Free, persistent, single-server
+# langgraph[postgres]  # Production-grade, requires PostgreSQL
